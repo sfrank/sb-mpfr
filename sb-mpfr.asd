@@ -14,7 +14,7 @@
 
 (defsystem sb-mpfr-tests
   :depends-on (sb-rt sb-mpfr)
-  :components ((:file "tests-mpfr")))
+  :components ((:file "tests")))
 
 (defmethod perform :after ((o load-op) (c (eql (find-system :sb-mpfr))))
   (provide 'sb-mpfr))
