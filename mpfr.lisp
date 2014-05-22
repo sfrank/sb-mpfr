@@ -181,6 +181,7 @@
 
 (in-package :sb-mpfr)
 
+(defvar +mpfr-precision+)
 (defvar *mpfr-version* nil)
 (defvar *mpfr-features* nil)
 
@@ -213,13 +214,14 @@
            (warn "SB-MPFR requires at least MPFR version 3.1")
            (setf success nil))
           (t
+           (setf +mpfr-precision+
+                 (alien-funcall (extern-alien "mpfr_get_default_prec"
+                                              (function long))))
            (pushnew :sb-mpfr *mpfr-features*)
            (setf *features* (union *features* *mpfr-features*))))
     success))
 
 (load-mpfr)
-
-
 
 ;;; types and initialization
 
@@ -252,10 +254,8 @@
                  mpfr_set_nan
                  mpfr_set_inf
                  mpfr_set_zero
-                 mpfr_get_default_prec
                  mpfr_set_default_prec
-                 mpfr_get_str
-                 ))
+                 mpfr_get_str))
 
 (define-alien-routine mpfr_init2 void
   (x (* (struct mpfrfloat)))
@@ -311,8 +311,6 @@
 (define-alien-routine mpfr_set_zero void
   (x (* (struct mpfrfloat)))
   (sign int))
-
-(define-alien-routine mpfr_get_default_prec long)
 
 (define-alien-routine mpfr_set_default_prec void
   (prec long))
@@ -1050,7 +1048,6 @@
 
 ;;;; lisp interface
 
-(defparameter +mpfr-precision+ (mpfr_get_default_prec))
 (defparameter *mpfr-rnd* :mpfr_rndn)
 (defparameter *mpfr-base* 10)
 
