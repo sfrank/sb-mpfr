@@ -185,16 +185,18 @@
 (defvar *mpfr-version* nil)
 (defvar *mpfr-features* nil)
 
-(defun %load-mpfr ()
+(defun try-load-shared-object (pathname)
   (handler-case
-      (load-shared-object #-(or win32 darwin) "libmpfr.so"
-                          #+darwin "libmpfr.dylib"
-                          #+win32 "mpfr.dll"
-                          :dont-save t)
+      (load-shared-object pathname :dont-save t)
     (error (e)
-      (warn "MPFR not loaded (~a)" e)
-      (return-from %load-mpfr nil)))
-  t)
+      nil)))
+
+(defun %load-mpfr ()
+  (or (some #'try-load-shared-object
+            #-(or win32 darwin) '("libmpfr.so" "libmpfr.so.4")
+            #+darwin '("libmpfr.dylib" "libmpfr.4.dylib")
+            #+win32 '("mpfr.dll"))
+      (warn "MPFR not loaded.")))
 
 (defun load-mpfr (&key (persistently t))
   (setf *mpfr-version* nil
